@@ -9,6 +9,13 @@ overrides:
 
 importers:
   .:
+    dependencies:
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       "@eslint/js":
         specifier: ^10.0.1
@@ -1112,6 +1119,13 @@ packages:
       }
     engines: { node: ">=8" }
 
+  dotenv@17.4.2:
+    resolution:
+      {
+        integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==,
+      }
+    engines: { node: ">=12" }
+
   es-module-lexer@2.3.1:
     resolution:
       {
@@ -2045,6 +2059,12 @@ packages:
       }
     engines: { node: ">=10" }
 
+  zod@4.4.3:
+    resolution:
+      {
+        integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==,
+      }
+
 snapshots:
   "@emnapi/core@1.11.1":
     dependencies:
@@ -2552,6 +2572,8 @@ snapshots:
   deep-is@0.1.4: {}
 
   detect-libc@2.1.2: {}
+
+  dotenv@17.4.2: {}
 
   es-module-lexer@2.3.1: {}
 
@@ -3093,3 +3115,5 @@ snapshots:
   word-wrap@1.2.5: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@4.4.3: {}

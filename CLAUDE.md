@@ -27,15 +27,21 @@ domain is small enough that `src/` with focused modules is the honest structure.
 
 Core split to preserve as it grows:
 
-- `src/cli.ts` — the only file touching `process`; thin: argv in, output + exit code out.
-- `src/run.ts` — pure dispatch: `(argv) → { output, exitCode }`. All commands stay pure
-  functions over injected file contents so tests need no filesystem; file I/O enters through
-  one small module when M1 lands.
+- `src/cli.ts` — the only file touching `process`; thin: argv in, output + exit code out
+  (plus a last-resort catch that maps envpact bugs to exit `70`).
+- `src/run.ts` — dispatch: `(argv, { cwd }) → { output, exitCode }`, with `cwd` injected by
+  cli.ts; also maps each module's typed error to its exit code.
+- File and module I/O is confined to `src/config.ts`, `src/env-file.ts`, and
+  `src/schema-loader.ts`. Commands (`src/commands/`) orchestrate those modules; validation
+  and rendering stay pure functions over parsed data so their tests need no filesystem.
 
 ## Project-specific conventions
 
 - **Exit codes are the API.** CI is a first-class consumer: `0` = pact holds, `1` = broken
-  contract / unknown command. Document any new code in the README the moment it exists.
+  pact (env doesn't match the schema, or the env file is missing), `2` = usage/config error
+  (missing/invalid `envpact` config, bad schema file, unknown command — D-104), `70` =
+  internal envpact bug (never confusable with the pact codes). Document any new code in the
+  README the moment it exists.
 - **Error messages are the product.** Every failure names the variable, what was expected,
   and how to fix it. No stack traces to users.
 - **Zod is the schema language** — don't invent a DSL.

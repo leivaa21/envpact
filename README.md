@@ -82,10 +82,12 @@ pnpm dev --help
 
 Exit codes are part of the public API and follow semver:
 
-| Code | Meaning                                    |
-| ---- | ------------------------------------------ |
-| `0`  | Pact holds — env matches the schema        |
-| `1`  | Broken contract, drift, or unknown command |
+| Code | Meaning                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------ |
+| `0`  | Pact holds — env matches the schema                                                        |
+| `1`  | Broken pact — env doesn't match the schema, or the env file is missing                     |
+| `2`  | Usage or config error — missing/invalid `envpact` config, bad schema file, unknown command |
+| `70` | Internal envpact bug — please [report it](https://github.com/leivaa21/envpact/issues)      |
 
 ## What envpact is _not_
 
