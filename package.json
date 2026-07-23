@@ -1,0 +1,51 @@
+{
+  "name": "envpact",
+  "version": "0.0.0",
+  "description": "A pact between your env schema and your .env — validate, generate .env.example, detect drift.",
+  "keywords": [
+    "env",
+    "dotenv",
+    "validation",
+    "zod",
+    "cli",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "author": "Adrián Leiva (https://github.com/leivaa21)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leivaa21/envpact.git"
+  },
+  "type": "module",
+  "bin": {
+    "envpact": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "build": "tsup",
+    "dev": "node src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  }
+}
