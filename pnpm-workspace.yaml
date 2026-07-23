@@ -1,2 +1,8 @@
 allowBuilds:
   esbuild: true
+
+# Keep `pnpm audit` at zero: transitive esbuild pulled by tsup/vitest sits on 0.27.x,
+# which carries GHSA-g7r4-m6w7-qqqr (dev-server file read, fixed in 0.28.1). Drop this
+# override once tsup/vite resolve >=0.28.1 on their own.
+overrides:
+  esbuild: ">=0.28.1"
