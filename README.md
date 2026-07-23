@@ -1,55 +1,113 @@
 # envpact
 
-A pact between your env schema and your `.env`. Define your environment contract once as a
-zod schema and envpact validates `.env` against it, generates a documented `.env.example`,
-and detects drift — killing the "works on my machine, missing var in prod" class of bugs at
-commit time.
+> A pact between your env schema and your `.env` — validate, generate `.env.example`, detect
+> drift.
 
-> **Status: pre-release scaffold.** The CLI shell is in place; `check`, `example`, and `diff`
-> land in M1. Not yet on npm.
+![status](https://img.shields.io/badge/status-pre--release-orange)
+![node](https://img.shields.io/badge/node-%E2%89%A5%2024-brightgreen)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-## Quickstart
+Your environment variables are an API without a contract: nothing guarantees that the vars
+your code needs exist, are well-formed, or match what `.env.example` promises new teammates.
+**envpact** makes that contract explicit — a [zod](https://zod.dev) schema is the single
+source of truth, and the CLI enforces it:
+
+- ✅ **`envpact check`** — validate your `.env` against the schema. Broken pact → exit `1`,
+  with an error that names the variable, what was expected, and how to fix it.
+- 📄 **`envpact example`** — generate a documented `.env.example` from the schema. It can
+  never drift, because it isn't hand-written.
+- 🔍 **`envpact diff`** — report drift between schema, `.env`, and `.env.example` — the vars
+  someone added to code but never documented, and the ones documented but no longer used.
+
+Kill the _"works on my machine, missing var in prod"_ class of bugs at commit time, not at
+3 a.m.
+
+> **Status:** pre-release — the CLI shell is published here while `check`, `example`, and
+> `diff` land in M1. Not on npm yet; the examples below show the committed design.
+
+## How it will look
+
+Define the contract once:
+
+```ts
+// env.schema.ts
+import { z } from "zod";
+
+export default z.object({
+  // Port the API listens on
+  PORT: z.coerce.number().int().min(1).max(65535),
+  // MongoDB connection string
+  MONGO_URL: z.string().url(),
+  // Optional: verbose request logging
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+});
+```
+
+Then let the CLI hold you to it:
+
+```console
+$ envpact check
+✖ Broken pact — 2 problems in .env
+
+  MONGO_URL   expected a URL, got "localhost:27017"
+              → add a scheme, e.g. mongodb://localhost:27017
+
+  PORT        missing — required by env.schema.ts
+              → set PORT in .env (integer between 1 and 65535)
+
+$ echo $?
+1
+```
+
+CI is a first-class consumer: wire `envpact check` into your pipeline and a broken contract
+fails the build before it fails production.
+
+## Install
+
+Not yet on npm — landing with M1. When it does:
+
+```bash
+pnpm add -D envpact    # or npm i -D / npx envpact
+```
+
+Until then, run it from source:
 
 ```bash
 git clone git@github.com:leivaa21/envpact.git
-cd envpact
-pnpm install
+cd envpact && pnpm install
 pnpm dev --help
 ```
 
-Planned usage once M1 lands:
+## Exit codes
 
-```bash
-envpact check      # validate .env against the schema → CI-friendly exit code
-envpact example    # (re)generate .env.example from the schema
-envpact diff       # drift report: schema vs .env vs .env.example
-```
+Exit codes are part of the public API and follow semver:
 
-## Architecture
+| Code | Meaning                                    |
+| ---- | ------------------------------------------ |
+| `0`  | Pact holds — env matches the schema        |
+| `1`  | Broken contract, drift, or unknown command |
 
-```
-src/
-├── cli.ts        # entry — the only file touching process; argv in, exit code out
-├── run.ts        # pure dispatch: (argv) → { output, exitCode }
-└── run.test.ts
-```
+## What envpact is _not_
 
-Commands are pure functions over injected file contents — the filesystem enters through one
-small module (M1), so everything else tests without I/O. Node ≥ 24, ESM, bundled with tsup.
+A contract checker, not a secrets manager — no secret storage, no encryption, no remote
+sync, no runtime dotenv replacement. Pair it with whatever loads your env; envpact only
+guarantees the contract holds.
 
-## Decisions
+## Roadmap
 
-- **Zod as the schema language** — one source of truth teams already know; no bespoke DSL.
-- **Exit codes are the API** — built CI-first: `0` pact holds, `1` broken contract.
-- **Contract checker, not a secrets manager** — no storage, encryption, or sync, by design.
+- [x] CLI shell — `--help` / `--version`, CI-friendly exit codes
+- [ ] **M1** — `check` + `example`, dogfooded on a real repo, published to npm
+- [ ] **M2** — `diff` + watch mode
+- [ ] Monorepo support — one pact per package
 
-## Status
+## Contributing
 
-- [x] Scaffold: CLI entry, `--help`/`--version`, tests/lint/typecheck/build green
-- [ ] M1: `check` + `example`, dogfooded on a real repo, published to npm
-- [ ] M2: `diff` + watch mode
+Issues and PRs welcome. The codebase is deliberately small and readable — `src/run.ts` is
+pure dispatch (`argv → { output, exitCode }`), `src/cli.ts` is the only file touching
+`process`, and every behavioral change ships with a test (`pnpm test`, `pnpm lint`,
+`pnpm typecheck` must be green). Design history lives in [docs/decisions.md](docs/decisions.md).
 
----
+## License
 
-MIT © Adrián Leiva ([leivaa21](https://github.com/leivaa21)) · part of
+MIT © Adrián Leiva ([leivaa21](https://github.com/leivaa21)) · built in public as part of
 [whos.leivaa.dev](https://whos.leivaa.dev)
